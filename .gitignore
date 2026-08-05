@@ -1,0 +1,12 @@
+.idea/
+.vscode/
+**/target/
+**/build/
+**/.classpath
+**/.project
+**/.settings/
+**/.factorypath
+**/.DS_Store
+*.log
+*.tmp
+*.class
