@@ -1,6 +1,7 @@
 package com.drivio.iam.domain.valueobject;
 
 import com.drivio.iam.domain.exception.InvalidEmailException;
+import com.drivio.iam.domain.exception.InvalidFullNameException;
 
 import java.util.regex.Pattern;
 
