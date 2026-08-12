@@ -1,5 +1,7 @@
 package com.drivio.iam.domain.valueobject;
 
+import com.drivio.iam.domain.exception.InvalidRawPasswordException;
+
 public record RawPassword(String value) {
     public RawPassword {
         value = normalize(value);
