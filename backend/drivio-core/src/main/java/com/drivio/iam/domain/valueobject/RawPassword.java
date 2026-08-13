@@ -1,5 +1,6 @@
 package com.drivio.iam.domain.valueobject;
 
+import com.drivio.iam.domain.exception.InvalidPasswordException;
 import com.drivio.iam.domain.exception.InvalidRawPasswordException;
 
 public record RawPassword(String value) {
@@ -17,12 +18,12 @@ public record RawPassword(String value) {
 
     private static void requiredValid(String value) {
         if (value.isBlank())
-            throw new InvalidRawPasswordException("Password cannot be blank");
+            throw new InvalidPasswordException("Password cannot be blank");
 
         if (value.length() < 8)
-            throw new InvalidRawPasswordException("Password must be at least 8 characters long");
+            throw new InvalidPasswordException("Password must be at least 8 characters long");
 
         if (value.length() > 128)
-            throw new InvalidRawPasswordException("Password must be at most 128 characters long");
+            throw new InvalidPasswordException("Password must be at most 128 characters long");
     }
 }
