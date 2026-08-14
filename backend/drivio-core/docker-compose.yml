@@ -1,0 +1,20 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: drivio-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: drivio
+      POSTGRES_USER: drivio
+      POSTGRES_PASSWORD: drivio
+
+    ports:
+      - "5433:5432"
+
+    volumes:
+      - drivio-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  drivio-postgres-data:
