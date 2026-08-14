@@ -53,6 +53,27 @@ public class User {
         );
     }
 
+    public static User restore(UserId id,
+                               FullName fullName,
+                               Email email,
+                               HashedPassword hashedPassword,
+                               Role role,
+                               boolean isActive,
+                               Instant createdAt,
+                               Instant updatedAt
+    ) {
+        return new User(
+                id,
+                fullName,
+                email,
+                hashedPassword,
+                role,
+                isActive,
+                createdAt,
+                updatedAt
+        );
+    }
+
     public UserId id() {
         return id;
     }
