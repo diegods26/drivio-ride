@@ -4,6 +4,8 @@ import com.drivio.bootstrap.security.SecurityConfig;
 import com.drivio.iam.application.dto.RegisterUserCommand;
 import com.drivio.iam.application.dto.RegisterUserResponse;
 import com.drivio.iam.application.port.in.RegisterUserUseCase;
+import com.drivio.iam.domain.exception.EmailAlreadyExistsException;
+import com.drivio.iam.domain.valueobject.Email;
 import com.drivio.iam.infrastructure.web.dto.RegisterUserRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,5 +65,31 @@ public class RegisterUserControllerTest {
         verify(registerUserUseCase).register(any(RegisterUserCommand.class));
     }
 
+    @Test
+    void shouldReturnConflictWhenEmailAlreadyExists() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Diego Santos",
+                "diego@gmail.com",
+                "Password123!"
+        );
+
+        when(registerUserUseCase.register(any(RegisterUserCommand.class))
+                ).thenThrow(new EmailAlreadyExistsException(
+                        new Email("diego@gmail.com"))
+        );
+
+        mockMvc.perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        )
+        .andExpect(status().isConflict())
+        .andExpect(jsonPath("$.status").value(409))
+        .andExpect(jsonPath("$.code").value("EMAIL_ALREADY_EXISTS"))
+        .andExpect(jsonPath("$.message").value("Email already exists"))
+        .andExpect(jsonPath("$.timestamp").exists());
+
+        verify(registerUserUseCase).register(any(RegisterUserCommand.class));
+
+    }
 
 }
