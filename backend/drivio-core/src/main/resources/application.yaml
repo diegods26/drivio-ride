@@ -4,8 +4,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5433/drivio
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
+    username: ${POSTGRES_USER:drivio}
+    password: ${POSTGRES_PASSWORD:drivio}
     driver-class-name: org.postgresql.Driver
 
 
