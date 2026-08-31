@@ -4,6 +4,7 @@ import com.drivio.iam.application.dto.RegisterUserCommand;
 import com.drivio.iam.application.dto.RegisterUserResponse;
 import com.drivio.iam.application.port.in.RegisterUserUseCase;
 import com.drivio.iam.infrastructure.web.dto.RegisterUserRequest;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class RegisterUserController {
 
     @PostMapping
     public ResponseEntity<RegisterUserResponse>
-        register(@RequestBody RegisterUserRequest request)
+        register(@Valid @RequestBody RegisterUserRequest request)
     {
         RegisterUserCommand command = new RegisterUserCommand(
                 request.fullname(),
