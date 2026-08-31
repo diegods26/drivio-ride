@@ -19,8 +19,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -90,6 +89,63 @@ public class RegisterUserControllerTest {
 
         verify(registerUserUseCase).register(any(RegisterUserCommand.class));
 
+    }
+
+    @Test
+    void shouldRejectBlankFullName() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest(
+                "",
+                "diego@gmail.com",
+                "Password123!"
+        );
+
+        mockMvc.perform(
+                post("/api/v1/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        )
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(registerUserUseCase);
+    }
+
+    @Test
+    void shouldRejectInvalidEmailFormat() throws Exception {
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Diego Santos",
+                "invalid_email",
+                "Password123!"
+        );
+
+        mockMvc.perform(
+                        post("/api/v1/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(registerUserUseCase);
+    }
+
+    @Test
+    void shouldRejectShortPassword() throws  Exception {
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Diego Santos",
+                "diego@gmail.com",
+                "123!"
+        );
+
+        mockMvc.perform(
+                        post("/api/v1/users")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(registerUserUseCase);
     }
 
 }
