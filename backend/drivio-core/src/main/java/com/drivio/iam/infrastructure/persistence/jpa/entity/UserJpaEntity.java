@@ -17,7 +17,7 @@ public class UserJpaEntity {
     @Id
     private UUID id;
 
-    @Column(name = "full_name", nullable = false, length = 150)
+    @Column(name = "full_name", nullable = false, length = 120)
     private String fullName;
 
     @Column(name = "email", nullable = false, length = 255)

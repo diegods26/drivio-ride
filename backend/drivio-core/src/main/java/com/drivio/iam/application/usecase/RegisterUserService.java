@@ -13,8 +13,9 @@ import com.drivio.iam.domain.valueobject.Email;
 import com.drivio.iam.domain.valueobject.FullName;
 import com.drivio.iam.domain.valueobject.HashedPassword;
 import com.drivio.iam.domain.valueobject.RawPassword;
+import org.springframework.stereotype.Service;
 
-
+@Service
 public class RegisterUserService implements RegisterUserUseCase {
 
     private final UserRepository repository;
