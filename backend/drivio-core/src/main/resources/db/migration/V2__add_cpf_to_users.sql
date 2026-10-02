@@ -1,0 +1,12 @@
+ALTER TABLE users
+    ADD COLUMN cpf VARCHAR(11);
+
+UPDATE users
+SET cpf = '00000000000'
+WHERE cpf IS NULL;
+
+ALTER TABLE users
+    ALTER COLUMN cpf SET NOT NULL;
+
+ALTER TABLE users
+    ADD CONSTRAINT uk_users_cpf UNIQUE (cpf);
