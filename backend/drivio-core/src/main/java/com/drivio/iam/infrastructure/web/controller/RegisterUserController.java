@@ -29,6 +29,7 @@ public class RegisterUserController {
         RegisterUserCommand command = new RegisterUserCommand(
                 request.fullname(),
                 request.email(),
+                request.cpf(),
                 request.password()
         );
 

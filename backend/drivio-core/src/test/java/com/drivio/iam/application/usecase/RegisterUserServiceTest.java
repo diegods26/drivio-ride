@@ -40,6 +40,7 @@ public class RegisterUserServiceTest {
                 new RegisterUserCommand(
                         "Diego Santos",
                         "diego@gmail.com",
+                        "12345678909",
                         "Password123!"
                 );
 
@@ -65,6 +66,7 @@ public class RegisterUserServiceTest {
                 new RegisterUserCommand(
                         "Diego Santos",
                         "diego@gmail.com",
+                        "12345678909",
                         "Password123!"
                 );
 
@@ -74,6 +76,7 @@ public class RegisterUserServiceTest {
                 new RegisterUserCommand(
                         "John Doe",
                         "diego@gmail.com",
+                        "98765432100",
                         "Password456!"
                 );
 
@@ -91,6 +94,7 @@ public class RegisterUserServiceTest {
                 new RegisterUserCommand(
                         "Diego Santos",
                         "diego@gmail.com",
+                        "12345678909",
                         "123"
                 );
 
@@ -111,6 +115,7 @@ public class RegisterUserServiceTest {
                 new RegisterUserCommand(
                         "Diego Santos",
                         "invalid-email",
+                        "12345678909",
                         "Password123!"
                 );
 

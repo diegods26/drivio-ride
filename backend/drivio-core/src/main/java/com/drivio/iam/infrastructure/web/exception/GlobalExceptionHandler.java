@@ -1,6 +1,8 @@
 package com.drivio.iam.infrastructure.web.exception;
 
+import com.drivio.iam.domain.exception.CpfAlreadyExistsException;
 import com.drivio.iam.domain.exception.EmailAlreadyExistsException;
+import com.drivio.iam.domain.exception.InvalidCpfException;
 import com.drivio.iam.domain.exception.InvalidEmailException;
 import com.drivio.iam.domain.exception.InvalidPasswordException;
 import com.drivio.iam.infrastructure.web.response.ErrorResponse;
@@ -48,6 +50,34 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(CpfAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleCpfAlreadyExists(
+            CpfAlreadyExistsException exception)
+    {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                "CPF_ALREADY_EXISTS",
+                "CPF already exists",
+                Instant.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
+    @ExceptionHandler(InvalidCpfException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCpf(
+            InvalidCpfException exception)
+    {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_CPF",
+                exception.getMessage(),
+                Instant.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(InvalidEmailException.class)

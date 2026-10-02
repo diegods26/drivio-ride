@@ -10,7 +10,8 @@ import java.util.UUID;
 @Entity
 @Getter
 @Table(name = "users", uniqueConstraints = {
-        @UniqueConstraint(name = "uk_users_email", columnNames = "email")
+        @UniqueConstraint(name = "uk_users_email", columnNames = "email"),
+        @UniqueConstraint(name = "uk_users_cpf", columnNames = "cpf")
 })
 public class UserJpaEntity {
 
@@ -22,6 +23,9 @@ public class UserJpaEntity {
 
     @Column(name = "email", nullable = false, length = 255)
     private String email;
+
+    @Column(name = "cpf", nullable = false, length = 11)
+    private String cpf;
 
     @Column(name = "password_hash", nullable = false, length = 255)
     private String hashedPassword;
@@ -44,6 +48,7 @@ public class UserJpaEntity {
     public UserJpaEntity(UUID id,
                          String fullName,
                          String email,
+                         String cpf,
                          String hashedPassword,
                          Role role,
                          boolean isActive,
@@ -52,6 +57,7 @@ public class UserJpaEntity {
         this.id = id;
         this.fullName = fullName;
         this.email = email;
+        this.cpf = cpf;
         this.hashedPassword = hashedPassword;
         this.role = role;
         this.isActive = isActive;

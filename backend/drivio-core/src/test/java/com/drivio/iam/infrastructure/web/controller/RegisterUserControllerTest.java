@@ -44,6 +44,7 @@ public class RegisterUserControllerTest {
                 new RegisterUserRequest(
                         "Diego Santos",
                         "diego@gmail.com",
+                        "12345678909",
                         "Password123!"
                 );
 
@@ -69,6 +70,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "Diego Santos",
                 "diego@gmail.com",
+                "12345678909",
                 "Password123!"
         );
 
@@ -96,6 +98,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "",
                 "diego@gmail.com",
+                "12345678909",
                 "Password123!"
         );
 
@@ -115,6 +118,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "Diego Santos",
                 "invalid_email",
+                "12345678909",
                 "Password123!"
         );
 
@@ -134,6 +138,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "Diego Santos",
                 "diego@gmail.com",
+                "12345678909",
                 "123!"
         );
 

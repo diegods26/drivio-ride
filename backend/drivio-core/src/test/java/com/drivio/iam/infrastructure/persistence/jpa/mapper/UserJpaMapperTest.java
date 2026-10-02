@@ -1,6 +1,7 @@
 package com.drivio.iam.infrastructure.persistence.jpa.mapper;
 
 import com.drivio.iam.domain.model.User;
+import com.drivio.iam.domain.valueobject.Cpf;
 import com.drivio.iam.domain.valueobject.Email;
 import com.drivio.iam.domain.valueobject.FullName;
 import com.drivio.iam.domain.valueobject.HashedPassword;
@@ -15,6 +16,7 @@ public class UserJpaMapperTest {
         User user = User.create(
                 new FullName("John Doe"),
                 new Email("john@gmail.com"),
+                new Cpf("12345678909"),
                 new HashedPassword("hashedPassword123")
         );
 
@@ -36,6 +38,7 @@ public class UserJpaMapperTest {
         User originalUser = User.create(
                 new FullName("Jane Doe"),
                 new Email("jane@gmail.com"),
+                new com.drivio.iam.domain.valueobject.Cpf("98765432100"),
                 new HashedPassword("hashedPassword456")
         );
 
