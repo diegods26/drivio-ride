@@ -7,8 +7,10 @@ import com.drivio.iam.application.port.out.DomainEventPublisher;
 import com.drivio.iam.application.port.out.PasswordEncoder;
 import com.drivio.iam.application.port.out.UserRepository;
 import com.drivio.iam.domain.event.UserRegisteredEvent;
+import com.drivio.iam.domain.exception.CpfAlreadyExistsException;
 import com.drivio.iam.domain.exception.EmailAlreadyExistsException;
 import com.drivio.iam.domain.model.User;
+import com.drivio.iam.domain.valueobject.Cpf;
 import com.drivio.iam.domain.valueobject.Email;
 import com.drivio.iam.domain.valueobject.FullName;
 import com.drivio.iam.domain.valueobject.HashedPassword;
@@ -34,6 +36,7 @@ public class RegisterUserService implements RegisterUserUseCase {
     public RegisterUserResponse register(RegisterUserCommand command) {
         Email email = new Email(command.email());
         FullName fullName = new FullName(command.fullName());
+        Cpf cpf = new Cpf(command.cpf());
 
         RawPassword rawPassword = new RawPassword(command.password());
 
@@ -41,10 +44,14 @@ public class RegisterUserService implements RegisterUserUseCase {
             throw new EmailAlreadyExistsException(email);
         }
 
+        if (repository.existsByCpf(cpf)) {
+            throw new CpfAlreadyExistsException(cpf);
+        }
+
         HashedPassword hashedPassword =
                 passwordEncoder.encode(rawPassword);
 
-        User user = User.create(fullName, email, hashedPassword);
+        User user = User.create(fullName, email, cpf, hashedPassword);
 
         repository.save(user);
 

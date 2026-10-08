@@ -1,14 +1,13 @@
 services:
-
   postgres:
     image: postgres:17
     container_name: drivio-postgres
     restart: unless-stopped
 
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:drivio}
-      POSTGRES_USER: ${POSTGRES_USER:drivio}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:drivio}
+      POSTGRES_DB: ${POSTGRES_DB:-drivio}
+      POSTGRES_USER: ${POSTGRES_USER:-drivio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-drivio}
 
     ports:
       - "5433:5432"
