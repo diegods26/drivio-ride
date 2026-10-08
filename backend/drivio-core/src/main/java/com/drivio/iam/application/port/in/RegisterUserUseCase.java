@@ -5,4 +5,6 @@ import com.drivio.iam.application.dto.RegisterUserResponse;
 
 public interface RegisterUserUseCase {
     RegisterUserResponse register(RegisterUserCommand command);
+
+    RegisterUserResponse registerDriver(RegisterUserCommand command);
 }

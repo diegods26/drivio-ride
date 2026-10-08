@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RegisterUserController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, RegisterDriverController.class})
 public class RegisterUserControllerTest {
 
     @Autowired
@@ -63,6 +63,45 @@ public class RegisterUserControllerTest {
         .andExpect(jsonPath("$.userId").value(userId.toString()));
 
         verify(registerUserUseCase).register(any(RegisterUserCommand.class));
+    }
+
+    @Test
+    void shouldRegisterDriverThroughDedicatedEndpoint() throws Exception {
+        UUID userId = UUID.randomUUID();
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Morgan Driver",
+                "driver@gmail.com",
+                "411.347.460-59",
+                "Password123!"
+        );
+
+        when(registerUserUseCase.registerDriver(any(RegisterUserCommand.class)))
+                .thenReturn(new RegisterUserResponse(userId));
+
+        mockMvc.perform(post("/api/v1/drivers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.userId").value(userId.toString()));
+
+        verify(registerUserUseCase).registerDriver(any(RegisterUserCommand.class));
+        verify(registerUserUseCase, never()).register(any(RegisterUserCommand.class));
+    }
+
+    @Test
+    void shouldRejectMalformedCpfAtHttpBoundary() throws Exception {
+        String request = """
+                {"fullname":"Morgan Driver","email":"driver@gmail.com",
+                "cpf":"abc411.347.460-59","password":"Password123!"}
+                """;
+
+        mockMvc.perform(post("/api/v1/drivers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(registerUserUseCase);
     }
 
     @Test

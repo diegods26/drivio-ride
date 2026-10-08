@@ -28,7 +28,7 @@ public class SecurityConfig {
                         "/swagger-ui/**",
                         "/v3/api-docs/**",
                         "/actuator/health/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/users")
+                .requestMatchers(HttpMethod.POST, "/api/v1/users", "/api/v1/drivers")
                     .permitAll()
                 .anyRequest().authenticated()
             );
