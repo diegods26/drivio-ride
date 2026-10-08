@@ -32,6 +32,7 @@ public class SecurityConfig {
                         "/actuator/health/**").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/users", "/api/v1/drivers")
                     .permitAll()
+                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             );
 

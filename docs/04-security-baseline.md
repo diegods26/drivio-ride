@@ -23,9 +23,16 @@
   license has a positive, current result from an official traffic authority or
   formally authorized provider. No result, expired status, provider outage, or
   ambiguity is a denial, not an implicit approval.
+- Driver-submitted vehicles start inactive. Only an authorized administrator
+  can activate a vehicle or approve a driver; persist approver identity and
+  timestamp for both decisions.
 - Driver-license verification requires a documented legal basis/consent, a
   restricted integration credential, minimal retention, and auditable results.
   Never log license numbers, raw documents, or provider credentials.
+- Interim manual CNH review stores only the decision, validity date, review
+  reason, administrator ID, and timestamp. The review API must not accept raw
+  CNH values or document images; evidence remains in the separately approved
+  out-of-band process until secure document storage is designed.
 - Passenger profile and saved-address operations derive the owner from the
   authenticated subject, require an active passenger account, and scope every
   address read/delete by both owner ID and resource ID. Never accept an owner ID
