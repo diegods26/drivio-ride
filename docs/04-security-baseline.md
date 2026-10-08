@@ -19,6 +19,18 @@
 - CPF must be valid and unique for passenger and driver registration. Normalize
   before validation and persistence. Avoid returning CPF or including it in
   logs, traces, metrics, errors, or analytics.
+- A driver must not be approved or enabled for rides unless their driver's
+  license has a positive, current result from an official traffic authority or
+  formally authorized provider. No result, expired status, provider outage, or
+  ambiguity is a denial, not an implicit approval.
+- Driver-license verification requires a documented legal basis/consent, a
+  restricted integration credential, minimal retention, and auditable results.
+  Never log license numbers, raw documents, or provider credentials.
+- Passenger profile and saved-address operations derive the owner from the
+  authenticated subject, require an active passenger account, and scope every
+  address read/delete by both owner ID and resource ID. Never accept an owner ID
+  from the request body or URL. Treat saved addresses and phone numbers as
+  sensitive personal data and do not log them.
 - Keep secrets out of source control and use a secret manager for non-local
   environments. Compose defaults are strictly local development credentials.
 - Encrypt transport with TLS outside local development; restrict database
