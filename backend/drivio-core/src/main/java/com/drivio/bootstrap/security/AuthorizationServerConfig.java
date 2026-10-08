@@ -71,9 +71,6 @@ public class AuthorizationServerConfig {
                         .authorizationGrantType(
                                 AuthorizationGrantType.AUTHORIZATION_CODE
                         )
-                        .authorizationGrantType(
-                                AuthorizationGrantType.REFRESH_TOKEN
-                        )
                         .redirectUri(
                                 "http://localhost:5173/auth/callback"
                         )
