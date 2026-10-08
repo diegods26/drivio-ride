@@ -76,6 +76,74 @@ class DriverProfileTest {
         assertThat(profile.status()).isEqualTo(DriverStatus.ONBOARDING);
     }
 
+        @Test
+        void shouldRecordManualApprovalOfCurrentLicenseWithAdminAndReason() {
+        UUID administratorId = UUID.randomUUID();
+        LocalDate today = LocalDate.of(2026, 10, 8);
+
+        DriverProfile reviewed = DriverProfile.create(UUID.randomUUID())
+            .recordManualLicenseReview(
+                administratorId,
+                true,
+                today.plusYears(1),
+                "CNH consultada no canal oficial; dados conferem",
+                today
+            );
+
+        assertThat(reviewed.status()).isEqualTo(DriverStatus.PENDING_APPROVAL);
+        assertThat(reviewed.licenseStatus()).isEqualTo(DriverLicenseStatus.VERIFIED);
+        assertThat(reviewed.licenseReviewedBy()).isEqualTo(administratorId);
+        assertThat(reviewed.licenseReviewedAt()).isNotNull();
+        assertThat(reviewed.licenseReviewReason())
+            .isEqualTo("CNH consultada no canal oficial; dados conferem");
+        }
+
+        @Test
+        void shouldRecordManualRejectionWithReasonAndBlockDriver() {
+        UUID administratorId = UUID.randomUUID();
+
+        DriverProfile reviewed = DriverProfile.create(UUID.randomUUID())
+            .recordManualLicenseReview(
+                administratorId,
+                false,
+                null,
+                "Documento vencido na consulta realizada",
+                LocalDate.of(2026, 10, 8)
+            );
+
+        assertThat(reviewed.status()).isEqualTo(DriverStatus.REJECTED);
+        assertThat(reviewed.licenseStatus()).isEqualTo(DriverLicenseStatus.INVALID);
+        assertThat(reviewed.licenseReviewedBy()).isEqualTo(administratorId);
+        assertThat(reviewed.licenseReviewReason()).contains("vencido");
+        assertThat(reviewed.canGoOnline(true, LocalDate.of(2026, 10, 8))).isFalse();
+        }
+
+        @Test
+        void shouldRequireExpirationDateForManualPositiveReview() {
+        assertThatThrownBy(() -> DriverProfile.create(UUID.randomUUID())
+                .recordManualLicenseReview(
+                    UUID.randomUUID(),
+                    true,
+                    null,
+                    "CNH conferida",
+                    LocalDate.of(2026, 10, 8)
+                ))
+            .isInstanceOf(IllegalArgumentException.class);
+        }
+
+        @Test
+        void shouldRejectDocumentNumbersInsideManualReviewReason() {
+        assertThatThrownBy(() -> DriverProfile.create(UUID.randomUUID())
+                .recordManualLicenseReview(
+                    UUID.randomUUID(),
+                    false,
+                    null,
+                    "CNH 12345678901 inválida",
+                    LocalDate.of(2026, 10, 8)
+                ))
+            .isInstanceOf(IllegalArgumentException.class);
+        }
+
     private static DriverProfile verifiedProfile(LocalDate validUntil) {
         return DriverProfile.create(UUID.randomUUID()).recordLicenseVerification(
                 LicenseVerificationResult.valid(validUntil, "verification-ref-123")

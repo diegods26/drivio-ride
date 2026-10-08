@@ -50,6 +50,15 @@ public class DriverProfileJpaEntity {
     @Column(name = "license_verified_at")
     private Instant licenseVerifiedAt;
 
+    @Column(name = "license_reviewed_by")
+    private UUID licenseReviewedBy;
+
+    @Column(name = "license_reviewed_at")
+    private Instant licenseReviewedAt;
+
+    @Column(name = "license_review_reason", length = 500)
+    private String licenseReviewReason;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -71,7 +80,10 @@ public class DriverProfileJpaEntity {
             String verificationReference,
             Instant licenseVerifiedAt,
             Instant createdAt,
-            Instant updatedAt
+            Instant updatedAt,
+            UUID licenseReviewedBy,
+            Instant licenseReviewedAt,
+            String licenseReviewReason
     ) {
         this.driverId = driverId;
         this.status = status;
@@ -85,6 +97,9 @@ public class DriverProfileJpaEntity {
         this.licenseVerifiedAt = licenseVerifiedAt;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.licenseReviewedBy = licenseReviewedBy;
+        this.licenseReviewedAt = licenseReviewedAt;
+        this.licenseReviewReason = licenseReviewReason;
     }
 
     public UUID getDriverId() { return driverId; }
@@ -97,6 +112,9 @@ public class DriverProfileJpaEntity {
     public String getVerificationProvider() { return verificationProvider; }
     public String getVerificationReference() { return verificationReference; }
     public Instant getLicenseVerifiedAt() { return licenseVerifiedAt; }
+    public UUID getLicenseReviewedBy() { return licenseReviewedBy; }
+    public Instant getLicenseReviewedAt() { return licenseReviewedAt; }
+    public String getLicenseReviewReason() { return licenseReviewReason; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

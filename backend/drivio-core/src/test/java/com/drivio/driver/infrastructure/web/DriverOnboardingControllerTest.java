@@ -81,7 +81,8 @@ class DriverOnboardingControllerTest {
                         DriverLicenseStatus.UNAVAILABLE,
                         null,
                         false,
-                        false
+                        false,
+                        null
                 )
         );
 
@@ -116,7 +117,8 @@ class DriverOnboardingControllerTest {
                         DriverLicenseStatus.VERIFIED,
                         LocalDate.now().plusYears(1),
                         false,
-                        true
+                        true,
+                        null
                 )
         );
 
@@ -149,5 +151,52 @@ class DriverOnboardingControllerTest {
                 .andExpect(jsonPath("$.active").value(true));
 
         verify(approveDriverVehicleUseCase).approve(vehicleId);
+    }
+
+    @Test
+    void shouldAllowAdminToManuallyApproveOrRejectLicenseAndExposeReason() throws Exception {
+        UUID driverId = UUID.randomUUID();
+        when(approveDriverUseCase.reviewLicense(
+                org.mockito.ArgumentMatchers.eq(driverId), any()
+        )).thenReturn(new DriverProfileView(
+                driverId,
+                DriverStatus.REJECTED,
+                DriverLicenseStatus.INVALID,
+                null,
+                false,
+                false,
+                "CNH vencida conforme consulta manual"
+        ));
+
+        mockMvc.perform(post("/api/v1/admin/drivers/{driverId}/license-review", driverId)
+                        .with(user("admin@example.com").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"valid":false,"validUntil":null,
+                                "reason":"CNH vencida conforme consulta manual"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("REJECTED"))
+                .andExpect(jsonPath("$.licenseReviewReason").value(
+                        "CNH vencida conforme consulta manual"));
+
+        verify(approveDriverUseCase).reviewLicense(
+                org.mockito.ArgumentMatchers.eq(driverId), any()
+        );
+    }
+
+    @Test
+    void shouldRequireExplicitManualLicenseDecision() throws Exception {
+        mockMvc.perform(post(
+                        "/api/v1/admin/drivers/{driverId}/license-review",
+                        UUID.randomUUID()
+                )
+                        .with(user("admin@example.com").roles("ADMIN"))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"reason\":\"document reviewed\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(approveDriverUseCase);
     }
 }

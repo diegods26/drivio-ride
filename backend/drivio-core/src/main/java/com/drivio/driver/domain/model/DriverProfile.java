@@ -17,7 +17,10 @@ public record DriverProfile(
         String verificationReference,
         Instant licenseVerifiedAt,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        UUID licenseReviewedBy,
+        Instant licenseReviewedAt,
+        String licenseReviewReason
 ) {
 
     public DriverProfile {
@@ -39,6 +42,11 @@ public record DriverProfile(
                 && (approvedBy == null || approvedAt == null)) {
             throw new IllegalArgumentException("Driver approval audit metadata is required");
         }
+        if (status == DriverStatus.REJECTED
+                && (licenseReviewedBy == null || licenseReviewedAt == null
+                || licenseReviewReason == null)) {
+            throw new IllegalArgumentException("License rejection audit metadata is required");
+        }
     }
 
     public static DriverProfile create(UUID driverId) {
@@ -55,14 +63,17 @@ public record DriverProfile(
                 null,
                 null,
                 now,
-                now
+                now,
+                null,
+                null,
+                null
         );
     }
 
     public DriverProfile recordLicenseVerification(LicenseVerificationResult result) {
         Objects.requireNonNull(result, "Verification result is required");
-        if (status == DriverStatus.SUSPENDED) {
-            throw new IllegalStateException("Suspended driver cannot restart onboarding");
+        if (status == DriverStatus.SUSPENDED || status == DriverStatus.REJECTED) {
+            throw new IllegalStateException("Suspended or rejected driver cannot restart onboarding");
         }
         Instant now = Instant.now();
         DriverLicenseStatus nextLicenseStatus = result.status();
@@ -84,7 +95,47 @@ public record DriverProfile(
                 verified ? result.auditReference() : null,
                 verified ? now : null,
                 createdAt,
-                now
+                now,
+                null,
+                null,
+                null
+        );
+    }
+
+    public DriverProfile recordManualLicenseReview(
+            UUID administratorId,
+            boolean licenseIsValid,
+            LocalDate validUntil,
+            String reason,
+            LocalDate today
+    ) {
+        Objects.requireNonNull(administratorId, "Reviewing administrator is required");
+        Objects.requireNonNull(today, "Review date is required");
+        String normalizedReason = normalizeReviewReason(reason);
+        if (licenseIsValid && (validUntil == null || validUntil.isBefore(today))) {
+            throw new IllegalArgumentException("A valid license requires a future expiration date");
+        }
+        if (status == DriverStatus.APPROVED || status == DriverStatus.SUSPENDED) {
+            throw new IllegalStateException("Approved or suspended driver cannot be manually reviewed");
+        }
+
+        Instant now = Instant.now();
+        return new DriverProfile(
+                driverId,
+                licenseIsValid ? DriverStatus.PENDING_APPROVAL : DriverStatus.REJECTED,
+                false,
+                null,
+                null,
+                licenseIsValid ? DriverLicenseStatus.VERIFIED : DriverLicenseStatus.INVALID,
+                licenseIsValid ? validUntil : null,
+                "MANUAL_ADMIN_REVIEW",
+                UUID.randomUUID().toString(),
+                licenseIsValid ? now : null,
+                createdAt,
+                now,
+                administratorId,
+                now,
+                normalizedReason
         );
     }
 
@@ -115,7 +166,10 @@ public record DriverProfile(
                 verificationReference,
                 licenseVerifiedAt,
                 createdAt,
-                Instant.now()
+                Instant.now(),
+                licenseReviewedBy,
+                licenseReviewedAt,
+                licenseReviewReason
         );
     }
 
@@ -135,7 +189,10 @@ public record DriverProfile(
                 verificationReference,
                 licenseVerifiedAt,
                 createdAt,
-                Instant.now()
+                Instant.now(),
+                licenseReviewedBy,
+                licenseReviewedAt,
+                licenseReviewReason
         );
     }
 
@@ -165,7 +222,32 @@ public record DriverProfile(
                 verificationReference,
                 licenseVerifiedAt,
                 createdAt,
-                Instant.now()
+                Instant.now(),
+                licenseReviewedBy,
+                licenseReviewedAt,
+                licenseReviewReason
         );
+    }
+
+    private static String normalizeReviewReason(String reason) {
+        Objects.requireNonNull(reason, "Review reason is required");
+        String normalized = reason.trim();
+        if (normalized.isEmpty() || normalized.length() > 500) {
+            throw new IllegalArgumentException("Review reason must contain 1 to 500 characters");
+        }
+        if (normalized.matches("(?s).*\\d{11,}.*")) {
+            throw new IllegalArgumentException("Review reason must not contain document numbers");
+        }
+        return normalized;
+    }
+
+    @Override
+    public String toString() {
+        return "DriverProfile[driverId=" + driverId
+                + ", status=" + status
+                + ", online=" + online
+                + ", licenseStatus=" + licenseStatus
+                + ", licenseValidUntil=" + licenseValidUntil
+                + ", licenseReviewReason=REDACTED]";
     }
 }

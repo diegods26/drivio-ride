@@ -9,14 +9,19 @@ CREATE TABLE driver_profiles (
     verification_provider VARCHAR(64),
     verification_reference VARCHAR(100),
     license_verified_at TIMESTAMP WITH TIME ZONE,
+    license_reviewed_by UUID,
+    license_reviewed_at TIMESTAMP WITH TIME ZONE,
+    license_review_reason VARCHAR(500),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
     CONSTRAINT fk_driver_profiles_user
         FOREIGN KEY (driver_id) REFERENCES users (id) ON DELETE CASCADE,
     CONSTRAINT fk_driver_profiles_approver
         FOREIGN KEY (approved_by) REFERENCES users (id),
+    CONSTRAINT fk_driver_profiles_license_reviewer
+        FOREIGN KEY (license_reviewed_by) REFERENCES users (id),
     CONSTRAINT ck_driver_profiles_status
-        CHECK (status IN ('ONBOARDING', 'PENDING_APPROVAL', 'APPROVED', 'SUSPENDED')),
+        CHECK (status IN ('ONBOARDING', 'PENDING_APPROVAL', 'APPROVED', 'REJECTED', 'SUSPENDED')),
     CONSTRAINT ck_driver_profiles_license_status
         CHECK (license_status IN (
             'NOT_SUBMITTED', 'PENDING', 'VERIFIED', 'INVALID',
@@ -28,8 +33,20 @@ CREATE TABLE driver_profiles (
         CHECK (
             (status IN ('APPROVED', 'SUSPENDED')
                 AND approved_by IS NOT NULL AND approved_at IS NOT NULL)
-            OR (status IN ('ONBOARDING', 'PENDING_APPROVAL')
+            OR (status IN ('ONBOARDING', 'PENDING_APPROVAL', 'REJECTED')
                 AND approved_by IS NULL AND approved_at IS NULL)
+        ),
+    CONSTRAINT ck_driver_profiles_license_review_audit
+        CHECK (
+            (license_reviewed_by IS NULL AND license_reviewed_at IS NULL
+                AND license_review_reason IS NULL)
+            OR (license_reviewed_by IS NOT NULL AND license_reviewed_at IS NOT NULL
+                AND license_review_reason IS NOT NULL)
+        ),
+    CONSTRAINT ck_driver_profiles_rejected_review
+        CHECK (
+            status <> 'REJECTED'
+            OR (license_status = 'INVALID' AND license_reviewed_by IS NOT NULL)
         ),
     CONSTRAINT ck_driver_profiles_verified_metadata
         CHECK (

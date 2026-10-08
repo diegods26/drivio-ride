@@ -42,12 +42,15 @@ prescription to create one microservice per context.
 12. Client input never determines whether an account is an administrator or
     whether a driver is approved.
 13. A driver is not eligible for approval or online status until the driver's
-   license is verified as valid with an official traffic authority or a
-   formally authorized verification provider. Missing, expired, inconclusive,
-   or unavailable verification fails closed.
+   license is confirmed valid by an administrator who manually consults the
+   issuing authority, or by a future official/authorized integration. The
+   administrator records the decision, checked expiration date, and reason.
+   Missing, expired, inconclusive, or unavailable checks fail closed.
 14. Newly registered vehicles remain inactive until reviewed and approved by
    an administrator. Vehicle and driver approvals record the administrator
    identity and timestamp.
+15. A manual license rejection records its reviewer, timestamp, and reason,
+   marks onboarding as rejected, and prevents the driver from going online.
 
 ## Ride lifecycle baseline
 
@@ -74,5 +77,12 @@ Driver license data and verification responses are also sensitive. Request the
 driver's consent and establish the applicable legal basis before verification;
 use only official/authorized channels, retain the minimum verification result
 and audit metadata needed for the decision, and never log document numbers or
-raw document images. A timeout or provider error must not be interpreted as a
-valid license.
+raw document images. Until an authorized API exists, an administrator manually
+checks the issuing authority and records only the decision, expiration date,
+reviewer, timestamp, and reason. A timeout or provider error must not be
+interpreted as a valid license.
+
+The manual-review endpoint records the administrator's attestation; it does not
+accept or store the raw CNH number or image. Evidence is reviewed through the
+approved out-of-band process until a protected document intake/storage design
+and its retention/legal controls are explicitly approved.

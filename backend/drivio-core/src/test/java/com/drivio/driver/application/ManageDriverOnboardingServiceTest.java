@@ -127,7 +127,10 @@ class ManageDriverOnboardingServiceTest {
                 "authority-ref-123",
                 now.minusSeconds(3600),
                 now.minusSeconds(7200),
-                now.minusSeconds(60)
+                now.minusSeconds(60),
+                null,
+                null,
+                null
         );
         when(driverRepository.findProfile(driverId)).thenReturn(Optional.of(expiredOnline));
         when(driverRepository.findVehicles(driverId)).thenReturn(List.of(

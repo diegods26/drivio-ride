@@ -119,7 +119,8 @@ public class ManageDriverOnboardingService implements ManageDriverOnboardingUseC
                 profile.licenseStatus(),
                 profile.licenseValidUntil(),
                 profile.online(),
-                profile.status() == com.drivio.driver.domain.model.DriverStatus.APPROVED
+                profile.status() == com.drivio.driver.domain.model.DriverStatus.APPROVED,
+                profile.licenseReviewReason()
         );
     }
 

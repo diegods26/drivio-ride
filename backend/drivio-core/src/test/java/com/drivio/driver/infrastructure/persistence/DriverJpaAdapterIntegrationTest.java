@@ -2,6 +2,7 @@ package com.drivio.driver.infrastructure.persistence;
 
 import com.drivio.driver.application.port.out.DriverRepository;
 import com.drivio.driver.domain.model.DriverProfile;
+import com.drivio.driver.domain.model.DriverLicenseStatus;
 import com.drivio.driver.domain.model.DriverStatus;
 import com.drivio.driver.domain.model.DriverVehicle;
 import com.drivio.driver.domain.model.LicenseVerificationResult;
@@ -148,6 +149,78 @@ class DriverJpaAdapterIntegrationTest {
                 LocalDate.now().getYear(),
                 "STANDARD"
         )).hasMessageContaining("ck_driver_vehicles_approval_audit");
+    }
+
+    @Test
+    void shouldPersistManualLicenseRejectionDecisionAndAudit() {
+        UUID driverId = createDriver();
+        UUID administratorId = createAdministrator();
+        DriverProfile rejectedProfile = DriverProfile.create(driverId)
+                .recordManualLicenseReview(
+                        administratorId,
+                        false,
+                        null,
+                        "CNH vencida após consulta manual à autoridade de trânsito",
+                        LocalDate.now()
+                );
+
+        driverRepository.saveProfile(rejectedProfile);
+
+        assertThat(driverRepository.findProfile(driverId))
+                .get()
+                .satisfies(saved -> {
+                    assertThat(saved.status()).isEqualTo(DriverStatus.REJECTED);
+                    assertThat(saved.licenseStatus()).isEqualTo(DriverLicenseStatus.INVALID);
+                    assertThat(saved.licenseReviewedBy()).isEqualTo(administratorId);
+                    assertThat(saved.licenseReviewedAt()).isNotNull();
+                    assertThat(saved.licenseReviewReason())
+                            .isEqualTo("CNH vencida após consulta manual à autoridade de trânsito");
+                    assertThat(saved.toString()).doesNotContain("41134746059");
+                });
+    }
+
+    @Test
+    void shouldPersistManualLicenseApprovalAndAllowFinalDriverApproval() {
+        UUID driverId = createDriver();
+        UUID administratorId = createAdministrator();
+        DriverProfile manuallyReviewed = DriverProfile.create(driverId)
+                .recordManualLicenseReview(
+                        administratorId,
+                        true,
+                        LocalDate.now().plusYears(1),
+                        "CNH conferida manualmente com a autoridade",
+                        LocalDate.now()
+                );
+        driverRepository.saveProfile(manuallyReviewed);
+
+        DriverVehicle activeVehicle = DriverVehicle.create(
+                driverId,
+                "LMN1P23",
+                "Honda",
+                "Civic",
+                LocalDate.now().getYear(),
+                VehicleCategory.COMFORT
+        ).activate(administratorId);
+        driverRepository.saveVehicle(activeVehicle);
+
+        DriverProfile approved = manuallyReviewed.approve(
+                administratorId,
+                true,
+                LocalDate.now()
+        );
+        driverRepository.saveProfile(approved);
+
+        assertThat(driverRepository.findProfile(driverId))
+                .get()
+                .satisfies(saved -> {
+                    assertThat(saved.status()).isEqualTo(DriverStatus.APPROVED);
+                    assertThat(saved.licenseReviewReason())
+                            .isEqualTo("CNH conferida manualmente com a autoridade");
+                    assertThat(saved.licenseReviewedBy()).isEqualTo(administratorId);
+                    assertThat(saved.licenseReviewedAt()).isNotNull();
+                    assertThat(saved.approvedBy()).isEqualTo(administratorId);
+                    assertThat(saved.approvedAt()).isNotNull();
+                });
     }
 
     private UUID createDriver() {

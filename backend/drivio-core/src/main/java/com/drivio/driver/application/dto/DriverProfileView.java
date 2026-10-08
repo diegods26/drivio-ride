@@ -12,6 +12,18 @@ public record DriverProfileView(
         DriverLicenseStatus licenseStatus,
         LocalDate licenseValidUntil,
         boolean online,
-        boolean approved
+        boolean approved,
+        String licenseReviewReason
 ) {
+
+        @Override
+        public String toString() {
+                return "DriverProfileView[driverId=" + driverId
+                                + ", status=" + status
+                                + ", licenseStatus=" + licenseStatus
+                                + ", licenseValidUntil=" + licenseValidUntil
+                                + ", online=" + online
+                                + ", approved=" + approved
+                                + ", licenseReviewReason=REDACTED]";
+        }
 }

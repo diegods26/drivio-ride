@@ -44,7 +44,10 @@ public class DriverJpaAdapter implements DriverRepository {
                 profile.verificationReference(),
                 profile.licenseVerifiedAt(),
                 profile.createdAt(),
-                profile.updatedAt()
+                profile.updatedAt(),
+                profile.licenseReviewedBy(),
+                profile.licenseReviewedAt(),
+                profile.licenseReviewReason()
         );
         return toDomain(profileRepository.save(entity));
     }
@@ -97,7 +100,10 @@ public class DriverJpaAdapter implements DriverRepository {
                 entity.getVerificationReference(),
                 entity.getLicenseVerifiedAt(),
                 entity.getCreatedAt(),
-                entity.getUpdatedAt()
+                entity.getUpdatedAt(),
+                entity.getLicenseReviewedBy(),
+                entity.getLicenseReviewedAt(),
+                entity.getLicenseReviewReason()
         );
     }
 

@@ -1,6 +1,7 @@
 package com.drivio.driver.application.usecase;
 
 import com.drivio.driver.application.dto.DriverProfileView;
+import com.drivio.driver.application.dto.ManualDriverLicenseReviewCommand;
 import com.drivio.driver.application.port.in.ApproveDriverUseCase;
 import com.drivio.driver.application.port.out.CurrentAdministratorProvider;
 import com.drivio.driver.application.port.out.DriverRepository;
@@ -47,7 +48,36 @@ public class ApproveDriverService implements ApproveDriverUseCase {
                 approved.licenseStatus(),
                 approved.licenseValidUntil(),
                 approved.online(),
-                true
+                true,
+                approved.licenseReviewReason()
+        );
+    }
+
+    @Override
+    @Transactional
+    public DriverProfileView reviewLicense(
+            UUID driverId,
+            ManualDriverLicenseReviewCommand command
+    ) {
+        UUID administratorId = currentAdministratorProvider.getCurrentAdministratorId();
+        DriverProfile profile = driverRepository.findProfile(driverId)
+                .orElseThrow(() -> new IllegalArgumentException("Driver onboarding profile not found"));
+        DriverProfile reviewed = profile.recordManualLicenseReview(
+                administratorId,
+                command.valid(),
+                command.validUntil(),
+                command.reason(),
+                LocalDate.now(clock)
+        );
+        DriverProfile saved = driverRepository.saveProfile(reviewed);
+        return new DriverProfileView(
+                saved.driverId(),
+                saved.status(),
+                saved.licenseStatus(),
+                saved.licenseValidUntil(),
+                saved.online(),
+                saved.status() == com.drivio.driver.domain.model.DriverStatus.APPROVED,
+                saved.licenseReviewReason()
         );
     }
 }
