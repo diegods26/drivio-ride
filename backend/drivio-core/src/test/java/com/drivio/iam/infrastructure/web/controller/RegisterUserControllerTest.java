@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
@@ -36,6 +37,9 @@ public class RegisterUserControllerTest {
 
     @MockitoBean
     private RegisterUserUseCase registerUserUseCase;
+
+        @MockitoBean
+        private JwtDecoder jwtDecoder;
 
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {

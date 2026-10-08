@@ -41,6 +41,10 @@ prescription to create one microservice per context.
     database as well as by the application.
 12. Client input never determines whether an account is an administrator or
     whether a driver is approved.
+13. A driver is not eligible for approval or online status until the driver's
+   license is verified as valid with an official traffic authority or a
+   formally authorized verification provider. Missing, expired, inconclusive,
+   or unavailable verification fails closed.
 
 ## Ride lifecycle baseline
 
@@ -62,3 +66,10 @@ identity and uniqueness, restrict reads to justified use cases, never include
 CPF in logs, and do not return it by default. A migration must not invent a
 placeholder CPF to make existing rows pass validation; legacy records require
 an explicit, safe remediation policy.
+
+Driver license data and verification responses are also sensitive. Request the
+driver's consent and establish the applicable legal basis before verification;
+use only official/authorized channels, retain the minimum verification result
+and audit metadata needed for the decision, and never log document numbers or
+raw document images. A timeout or provider error must not be interpreted as a
+valid license.
