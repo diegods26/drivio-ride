@@ -27,6 +27,9 @@ be confirmed before implementing the driver-verification adapter.
 ## Consequences
 
 - Driver approval is blocked until verification is positive and current.
+- Vehicles remain inactive until a separate administrator review. Both vehicle
+  activation and driver approval require an authenticated administrator and
+  retain approver ID plus decision timestamp.
 - Provider outages may delay onboarding; the system remains fail-closed.
 - Store only the minimum status, checked-at time, source, and audit reference
   required to justify the decision; do not log or retain unnecessary document

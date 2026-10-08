@@ -45,6 +45,9 @@ prescription to create one microservice per context.
    license is verified as valid with an official traffic authority or a
    formally authorized verification provider. Missing, expired, inconclusive,
    or unavailable verification fails closed.
+14. Newly registered vehicles remain inactive until reviewed and approved by
+   an administrator. Vehicle and driver approvals record the administrator
+   identity and timestamp.
 
 ## Ride lifecycle baseline
 

@@ -23,6 +23,9 @@
   license has a positive, current result from an official traffic authority or
   formally authorized provider. No result, expired status, provider outage, or
   ambiguity is a denial, not an implicit approval.
+- Driver-submitted vehicles start inactive. Only an authorized administrator
+  can activate a vehicle or approve a driver; persist approver identity and
+  timestamp for both decisions.
 - Driver-license verification requires a documented legal basis/consent, a
   restricted integration credential, minimal retention, and auditable results.
   Never log license numbers, raw documents, or provider credentials.
