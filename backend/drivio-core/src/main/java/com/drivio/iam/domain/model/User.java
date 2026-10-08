@@ -44,6 +44,21 @@ public class User {
                               Email email,
                               Cpf cpf,
                               HashedPassword hashedPassword) {
+        return create(fullName, email, cpf, hashedPassword, Role.PASSENGER);
+    }
+
+    public static User createDriver(FullName fullName,
+                                    Email email,
+                                    Cpf cpf,
+                                    HashedPassword hashedPassword) {
+        return create(fullName, email, cpf, hashedPassword, Role.DRIVER);
+    }
+
+    private static User create(FullName fullName,
+                               Email email,
+                               Cpf cpf,
+                               HashedPassword hashedPassword,
+                               Role role) {
         UserId id = UserId.generate();
         Instant now = Instant.now();
         return new User(
@@ -52,7 +67,7 @@ public class User {
                 email,
                 cpf,
                 hashedPassword,
-                Role.PASSENGER,
+                role,
                 true,
                 now,
                 now

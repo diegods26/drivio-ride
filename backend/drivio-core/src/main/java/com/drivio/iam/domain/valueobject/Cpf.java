@@ -11,31 +11,37 @@ public record Cpf(String value) {
 
     private static String normalize(String value) {
         if (value == null) {
-            throw new InvalidCpfException(null);
+            throw new InvalidCpfException();
         }
 
-        return value.replaceAll("\\D", "").trim();
+        String normalized = value.trim();
+        if (!normalized.matches(
+            "(?:\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})")) {
+            throw new InvalidCpfException();
+        }
+
+        return normalized.replace(".", "").replace("-", "");
     }
 
     private static void requireValid(String value) {
         if (value.isBlank()) {
-            throw new InvalidCpfException(value);
+            throw new InvalidCpfException();
         }
 
         if (value.length() != 11) {
-            throw new InvalidCpfException(value);
+            throw new InvalidCpfException();
         }
 
         if (!value.matches("\\d{11}")) {
-            throw new InvalidCpfException(value);
+            throw new InvalidCpfException();
         }
 
         if (isRepeatedDigits(value)) {
-            throw new InvalidCpfException(value);
+            throw new InvalidCpfException();
         }
 
         if (!hasValidCheckDigits(value)) {
-            throw new InvalidCpfException(value);
+            throw new InvalidCpfException();
         }
     }
 

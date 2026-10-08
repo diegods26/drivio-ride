@@ -16,7 +16,10 @@ public record RegisterUserRequest(
         String email,
 
         @NotBlank(message = "CPF is required")
-        @Pattern(regexp = "\\d{11}", message = "CPF must contain 11 digits")
+        @Pattern(
+                regexp = "(?:\\d{11}|\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2})",
+                message = "CPF must contain 11 digits, optionally formatted"
+        )
         String cpf,
 
         @NotBlank(message = "Password is required")

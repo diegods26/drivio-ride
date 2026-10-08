@@ -1,12 +1,9 @@
 ALTER TABLE users
-    ADD COLUMN cpf VARCHAR(11);
-
-UPDATE users
-SET cpf = '00000000000'
-WHERE cpf IS NULL;
+    ADD COLUMN cpf VARCHAR(11) NOT NULL;
 
 ALTER TABLE users
-    ALTER COLUMN cpf SET NOT NULL;
+    ADD CONSTRAINT ck_users_cpf_format
+        CHECK (cpf ~ '^[0-9]{11}$');
 
 ALTER TABLE users
     ADD CONSTRAINT uk_users_cpf UNIQUE (cpf);

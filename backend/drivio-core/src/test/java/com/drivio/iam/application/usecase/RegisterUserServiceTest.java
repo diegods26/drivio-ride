@@ -5,9 +5,12 @@ import com.drivio.iam.application.dto.RegisterUserResponse;
 import com.drivio.iam.application.port.out.PasswordEncoder;
 import com.drivio.iam.application.port.out.UserRepository;
 import com.drivio.iam.domain.event.UserRegisteredEvent;
+import com.drivio.iam.domain.exception.CpfAlreadyExistsException;
 import com.drivio.iam.domain.exception.EmailAlreadyExistsException;
+import com.drivio.iam.domain.exception.InvalidCpfException;
 import com.drivio.iam.domain.exception.InvalidEmailException;
 import com.drivio.iam.domain.exception.InvalidPasswordException;
+import com.drivio.iam.domain.model.Role;
 import com.drivio.iam.infrastructure.persistence.inmemory.InMemoryDomainEventPublisher;
 import com.drivio.iam.infrastructure.persistence.inmemory.InMemoryUserRepository;
 import com.drivio.iam.infrastructure.security.BCryptPasswordEncoderAdapter;
@@ -51,12 +54,75 @@ public class RegisterUserServiceTest {
         assertThat(repository.existsByEmail(
             new Email("diego@gmail.com")
         )).isTrue();
+        assertThat(repository.findByEmail(new Email("diego@gmail.com")))
+                .get()
+                .extracting("role")
+                .isEqualTo(Role.PASSENGER);
 
         assertThat(eventPublisher.events())
                 .hasSize(1)
                 .first()
                 .isInstanceOf(UserRegisteredEvent.class);
 
+    }
+
+    @Test
+    void shouldRegisterDriverWithDriverRole() {
+        RegisterUserCommand command = new RegisterUserCommand(
+                "Morgan Driver",
+                "driver@gmail.com",
+                "41134746059",
+                "Password123!"
+        );
+
+        service.registerDriver(command);
+
+        assertThat(repository.findByEmail(new Email("driver@gmail.com")))
+                .get()
+                .extracting("role")
+                .isEqualTo(Role.DRIVER);
+    }
+
+    @Test
+    void shouldRejectInvalidCpfWithoutPersistingOrPublishingEvent() {
+        RegisterUserCommand command = new RegisterUserCommand(
+                "Morgan Driver",
+                "driver@gmail.com",
+                "41134746050",
+                "Password123!"
+        );
+
+        assertThatThrownBy(() -> service.registerDriver(command))
+                .isInstanceOf(InvalidCpfException.class);
+
+        assertThat(repository.findByEmail(new Email("driver@gmail.com")))
+                .isEmpty();
+        assertThat(eventPublisher.events()).isEmpty();
+    }
+
+    @Test
+    void shouldRejectCpfAlreadyRegistered() {
+        RegisterUserCommand first = new RegisterUserCommand(
+                "Morgan Passenger",
+                "passenger@gmail.com",
+                "41134746059",
+                "Password123!"
+        );
+        RegisterUserCommand second = new RegisterUserCommand(
+                "Morgan Driver",
+                "driver@gmail.com",
+                "41134746059",
+                "Password123!"
+        );
+
+        service.register(first);
+
+        assertThatThrownBy(() -> service.registerDriver(second))
+                .isInstanceOf(CpfAlreadyExistsException.class);
+
+        assertThat(repository.findByEmail(new Email("driver@gmail.com")))
+                .isEmpty();
+        assertThat(eventPublisher.events()).hasSize(1);
     }
 
     @Test
