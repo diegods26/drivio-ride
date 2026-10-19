@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.UUID;
@@ -25,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RegisterUserController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, RegisterDriverController.class})
 public class RegisterUserControllerTest {
 
     @Autowired
@@ -37,6 +38,9 @@ public class RegisterUserControllerTest {
     @MockitoBean
     private RegisterUserUseCase registerUserUseCase;
 
+        @MockitoBean
+        private JwtDecoder jwtDecoder;
+
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -44,6 +48,7 @@ public class RegisterUserControllerTest {
                 new RegisterUserRequest(
                         "Diego Santos",
                         "diego@gmail.com",
+                        "12345678909",
                         "Password123!"
                 );
 
@@ -65,10 +70,50 @@ public class RegisterUserControllerTest {
     }
 
     @Test
+    void shouldRegisterDriverThroughDedicatedEndpoint() throws Exception {
+        UUID userId = UUID.randomUUID();
+        RegisterUserRequest request = new RegisterUserRequest(
+                "Morgan Driver",
+                "driver@gmail.com",
+                "411.347.460-59",
+                "Password123!"
+        );
+
+        when(registerUserUseCase.registerDriver(any(RegisterUserCommand.class)))
+                .thenReturn(new RegisterUserResponse(userId));
+
+        mockMvc.perform(post("/api/v1/drivers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.userId").value(userId.toString()));
+
+        verify(registerUserUseCase).registerDriver(any(RegisterUserCommand.class));
+        verify(registerUserUseCase, never()).register(any(RegisterUserCommand.class));
+    }
+
+    @Test
+    void shouldRejectMalformedCpfAtHttpBoundary() throws Exception {
+        String request = """
+                {"fullname":"Morgan Driver","email":"driver@gmail.com",
+                "cpf":"abc411.347.460-59","password":"Password123!"}
+                """;
+
+        mockMvc.perform(post("/api/v1/drivers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+
+        verifyNoInteractions(registerUserUseCase);
+    }
+
+    @Test
     void shouldReturnConflictWhenEmailAlreadyExists() throws Exception {
         RegisterUserRequest request = new RegisterUserRequest(
                 "Diego Santos",
                 "diego@gmail.com",
+                "12345678909",
                 "Password123!"
         );
 
@@ -96,6 +141,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "",
                 "diego@gmail.com",
+                "12345678909",
                 "Password123!"
         );
 
@@ -115,6 +161,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "Diego Santos",
                 "invalid_email",
+                "12345678909",
                 "Password123!"
         );
 
@@ -134,6 +181,7 @@ public class RegisterUserControllerTest {
         RegisterUserRequest request = new RegisterUserRequest(
                 "Diego Santos",
                 "diego@gmail.com",
+                "12345678909",
                 "123!"
         );
 

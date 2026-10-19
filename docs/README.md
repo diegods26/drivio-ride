@@ -1,0 +1,55 @@
+# Drivio Ride Documentation
+
+The planning source is `Project Drivio Planejamento.pdf`. The Markdown documents
+below turn its product and architecture decisions into a maintainable baseline.
+When a decision changes, update the relevant document and record significant
+trade-offs in `adr/`.
+
+## Baseline
+
+- [Product vision and MVP](01-product-vision.md)
+- [Domain boundaries and business rules](02-domain-and-business-rules.md)
+- [Architecture](03-architecture.md)
+- [Security baseline](04-security-baseline.md)
+- [Delivery and quality](05-delivery-and-quality.md)
+- [ADR-0001: Modular monolith](adr/ADR-0001-modular-monolith.md)
+- [ADR-0002: Framework-independent domain](adr/ADR-0002-framework-independent-domain.md)
+- [ADR-0003: Public-client OAuth security](adr/ADR-0003-public-client-oauth.md)
+- [ADR-0004: Official driver-license verification](adr/ADR-0004-official-driver-license-verification.md)
+
+## Current implementation position
+
+The backend currently contains identity and access (user registration, password
+authentication, CPF validation, PostgreSQL persistence, and OAuth2/PKCE tests)
+plus passenger self-service profile contact and saved Brazilian addresses. The
+driver onboarding, vehicle registration, availability gates, and administrative
+approval flows are implemented. License verification is deliberately fail-closed
+until an official authority or formally authorized provider is configured; the
+current default cannot verify or approve a driver. Ride, location, matching,
+payment, notification, broader administration, and observability capabilities
+remain planned.
+
+The package directories for some planned contexts are placeholders, not
+implemented features. The frontend is intentionally deferred until the backend
+MVP has been completed and reviewed.
+
+## Delivery phases
+
+The roadmap follows the source plan while using a modular monolith as the first
+deployment unit:
+
+1. Foundation and architecture baseline.
+2. Identity and access, including secure passenger/driver registration.
+3. Passenger profile and account capabilities.
+4. Driver onboarding, documents, vehicle, approval, and availability.
+5. Location updates and privacy boundaries.
+6. Ride lifecycle, pricing estimate, and ride history.
+7. Driver matching and concurrency controls.
+8. Simulated payment and payment events.
+9. Notifications and ratings.
+10. Administrative operations and audit trail.
+11. Observability, resilience, CI/CD hardening, and production readiness.
+12. Backend acceptance review; only then begin frontend planning.
+
+Each phase is implemented on a dedicated feature branch, validated, committed,
+and presented for review before the next phase begins.

@@ -7,8 +7,11 @@ import com.drivio.iam.application.port.out.DomainEventPublisher;
 import com.drivio.iam.application.port.out.PasswordEncoder;
 import com.drivio.iam.application.port.out.UserRepository;
 import com.drivio.iam.domain.event.UserRegisteredEvent;
+import com.drivio.iam.domain.exception.CpfAlreadyExistsException;
 import com.drivio.iam.domain.exception.EmailAlreadyExistsException;
+import com.drivio.iam.domain.model.Role;
 import com.drivio.iam.domain.model.User;
+import com.drivio.iam.domain.valueobject.Cpf;
 import com.drivio.iam.domain.valueobject.Email;
 import com.drivio.iam.domain.valueobject.FullName;
 import com.drivio.iam.domain.valueobject.HashedPassword;
@@ -32,8 +35,21 @@ public class RegisterUserService implements RegisterUserUseCase {
 
     @Override
     public RegisterUserResponse register(RegisterUserCommand command) {
+        return register(command, Role.PASSENGER);
+    }
+
+    @Override
+    public RegisterUserResponse registerDriver(RegisterUserCommand command) {
+        return register(command, Role.DRIVER);
+    }
+
+    private RegisterUserResponse register(
+            RegisterUserCommand command,
+            Role role
+    ) {
         Email email = new Email(command.email());
         FullName fullName = new FullName(command.fullName());
+        Cpf cpf = new Cpf(command.cpf());
 
         RawPassword rawPassword = new RawPassword(command.password());
 
@@ -41,10 +57,20 @@ public class RegisterUserService implements RegisterUserUseCase {
             throw new EmailAlreadyExistsException(email);
         }
 
+        if (repository.existsByCpf(cpf)) {
+            throw new CpfAlreadyExistsException();
+        }
+
         HashedPassword hashedPassword =
                 passwordEncoder.encode(rawPassword);
 
-        User user = User.create(fullName, email, hashedPassword);
+        User user = switch (role) {
+            case PASSENGER -> User.create(fullName, email, cpf, hashedPassword);
+            case DRIVER -> User.createDriver(fullName, email, cpf, hashedPassword);
+            case ADMIN -> throw new IllegalArgumentException(
+                "Administrative users cannot self-register"
+            );
+        };
 
         repository.save(user);
 
